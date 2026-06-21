@@ -116,9 +116,48 @@ func WebhookHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func downloadTelegramFile(fileID, sid, ext string) (fileURL, fileName string, err error) {
-	// 实现下载逻辑，可复用原项目的 downloadAndSaveTgFile
-	// 这里需要调用 Telegram API 获取文件路径，再下载保存到本地
-	// 返回 fileURL 和 fileName
-	// 简化版，实际需要实现
-	return "", "", nil
+    // 1. 获取文件路径
+    url := fmt.Sprintf("https://api.telegram.org/bot%s/getFile?file_id=%s", config.AppConfig.BotToken, fileID)
+    resp, err := http.Get(url)
+    if err != nil {
+        return "", "", err
+    }
+    defer resp.Body.Close()
+    var result struct {
+        Ok     bool `json:"ok"`
+        Result struct {
+            FilePath string `json:"file_path"`
+        } `json:"result"`
+    }
+    if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+        return "", "", err
+    }
+    if !result.Ok {
+        return "", "", fmt.Errorf("telegram getFile error")
+    }
+    filePath := result.Result.FilePath
+    // 2. 下载文件
+    fileURLTg := fmt.Sprintf("https://api.telegram.org/file/bot%s/%s", config.AppConfig.BotToken, filePath)
+    resp, err = http.Get(fileURLTg)
+    if err != nil {
+        return "", "", err
+    }
+    defer resp.Body.Close()
+    // 3. 保存到本地
+    saveName := utils.GenerateUniqueFileName(ext)
+    destPath := filepath.Join("public/uploads", saveName)
+    if _, err := utils.SaveUploadedFile(resp.Body, destPath); err != nil {
+        return "", "", err
+    }
+    // 4. 记录文件
+    repository.InsertFileRecord(sid, destPath, resp.ContentLength)
+    // 5. 构建返回URL
+    fileURL = "/uploads/" + saveName
+    if config.AppConfig.Domain != "" {
+        fileURL = "https://" + config.AppConfig.Domain + fileURL
+    }
+    // 从原始文件名中提取
+    // 可通过 Content-Disposition 获取，但这里简单使用
+    fileName = filepath.Base(filePath)
+    return fileURL, fileName, nil
 }
