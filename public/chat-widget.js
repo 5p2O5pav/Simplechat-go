@@ -9,9 +9,9 @@
     // =========================
     // 2. 全局状态管理
     // =========================
-     function getCookie(name) {
-     const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-     return match ? decodeURIComponent(match[2]) : null;
+    function getCookie(name) {
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? decodeURIComponent(match[2]) : null;
     }
     let sid = getCookie("cw_sid") || localStorage.getItem("cw_sid");
     let token = getCookie("cw_token") || localStorage.getItem("cw_token");
@@ -20,7 +20,6 @@
     let lastTime = 0;
     let open = false;
 
-    // 去重池（最多 500 条 ID）
     const MAX_SEEN = 500;
     const seen = new Set();
     function addSeen(id) {
@@ -33,23 +32,15 @@
     }
     function hasSeen(id) { return seen.has(id); }
 
-    // 文件上传状态
     let uploadingFile = null;
     let isUploading = false;
-
-    // 历史加载状态
     let loadingMore = false;
     let hasMoreHistory = true;
     let oldestTime = null;
 
-    // 轮询退避参数
-    const POLL_FAST = 1000;          // 快速期 1 秒
-    const POLL_MEDIUM = 2000;        // 中速期 2 秒
-    const FAST_DURATION = 30000;     // 快速期持续时间
-    const MEDIUM_DURATION = 30000;   // 中速期持续时间
-    const BACKOFF_INIT = 2000;       // 退避起始间隔
-    const BACKOFF_INCREMENT = 500;   // 每次增加 0.5 秒
-    const BACKOFF_MAX = 15000;       // 退避上限 15 秒
+    const POLL_FAST = 1000, POLL_MEDIUM = 2000;
+    const FAST_DURATION = 30000, MEDIUM_DURATION = 30000;
+    const BACKOFF_INIT = 2000, BACKOFF_INCREMENT = 500, BACKOFF_MAX = 15000;
     let lastMessageTime = Date.now();
     let backoffInterval = BACKOFF_INIT;
     let pollTimer = null;
@@ -77,7 +68,6 @@
                 --btn-right-shrunk: -22px; --btn-font-size: 17px;
             }
         }
-
         .cw-btn {
             position: fixed; right: var(--btn-right); bottom: var(--btn-bottom);
             width: var(--btn-size); height: var(--btn-size); border-radius: 50%;
@@ -111,14 +101,8 @@
         @media (max-width: 480px) {
             .cw-header { padding: 7px 10px; font-size: 13px; }
         }
-        .cw-header-dot {
-            width: 8px; height: 8px; border-radius: 50%;
-            background: #4ade80; margin-right: 8px; flex-shrink: 0;
-        }
-        .cw-close {
-            font-size: 18px; opacity: 0.7; cursor: pointer;
-            margin-left: auto; line-height: 1; padding: 0 2px;
-        }
+        .cw-header-dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; margin-right: 8px; flex-shrink: 0; }
+        .cw-close { font-size: 18px; opacity: 0.7; cursor: pointer; margin-left: auto; line-height: 1; padding: 0 2px; }
         .cw-close:hover { opacity: 1; }
 
         .cw-msgs { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; }
@@ -135,31 +119,21 @@
         }
         .cw-input-row input:disabled { opacity: 0.5; }
         .cw-attach-btn, .cw-send-btn { flex-shrink: 0; cursor: pointer; }
-        .cw-attach-btn {
-            width: 38px; height: 38px; font-size: 22px; color: #07c160;
-            background: #f1f1f1; border-radius: 50%; border: none;
-        }
-        .cw-send-btn {
-            border: none; background: #111; color: #fff; padding: 8px 14px;
-            border-radius: 18px; font-size: 13px; font-weight: 500;
-        }
+        .cw-attach-btn { width: 38px; height: 38px; font-size: 22px; color: #07c160; background: #f1f1f1; border-radius: 50%; border: none; }
+        .cw-send-btn { border: none; background: #111; color: #fff; padding: 8px 14px; border-radius: 18px; font-size: 13px; font-weight: 500; }
         .cw-send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-        .cw-msg-row { display: flex; margin: 10px 0; align-items: flex-start; gap: 8px; }
+        /* 消息样式（含时间） */
+        .cw-msg-wrapper { margin: 10px 0; }
+        .cw-msg-time { text-align: center; font-size: 10px; color: #999; margin-bottom: 3px; }
+        .cw-msg-row { display: flex; align-items: flex-start; gap: 8px; }
         .cw-msg-row.user { flex-direction: row-reverse; }
-        .cw-avatar {
-            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff;
-        }
+        .cw-avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
         .cw-avatar.user { background: #07c160; }
         .cw-avatar.agent { background: #111; }
-        .cw-bubble {
-            max-width: 75%; padding: 8px 10px; border-radius: 10px; font-size: 13px;
-            line-height: 1.5; word-break: break-word;
-        }
+        .cw-bubble { max-width: 75%; padding: 8px 10px; border-radius: 10px; font-size: 13px; line-height: 1.5; word-break: break-word; }
         .cw-bubble.user { background: #95ec69; color: #111; border-top-right-radius: 4px; }
         .cw-bubble.agent { background: #fff; border: 1px solid #e5e5e5; color: #111; border-top-left-radius: 4px; }
-
         .cw-file-msg { max-width: 75%; }
         .cw-file-card { background: #fff; border: 1px solid #e5e5e5; border-radius: 12px; overflow: hidden; }
         .cw-file-image { width: 100%; max-height: 180px; object-fit: cover; cursor: pointer; }
@@ -184,22 +158,12 @@
             background: rgba(245,245,245,0.8); z-index: 11; align-items: center; justify-content: center;
         }
         .cw-uploading-overlay.show { display: flex; }
-        .cw-spinner {
-            width: 32px; height: 32px; border: 3px solid #e0e0e0; border-top: 3px solid #111;
-            border-radius: 50%; animation: cw-spin 1s linear infinite;
-        }
+        .cw-spinner { width: 32px; height: 32px; border: 3px solid #e0e0e0; border-top: 3px solid #111; border-radius: 50%; animation: cw-spin 1s linear infinite; }
         @keyframes cw-spin { to { transform: rotate(360deg); } }
 
-        .cw-error-toast {
-            position: fixed; top: 20px; right: 20px; background: #ff4444; color: #fff;
-            padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 1000000;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
+        .cw-error-toast { position: fixed; top: 20px; right: 20px; background: #ff4444; color: #fff; padding: 12px 20px; border-radius: 8px; font-size: 13px; z-index: 1000000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .cw-load-more { width: 100%; text-align: center; padding: 10px 0; flex-shrink: 0; }
-        .cw-load-more button {
-            background: #e0e0e0; border: none; border-radius: 12px; padding: 6px 16px;
-            font-size: 12px; cursor: pointer; color: #333;
-        }
+        .cw-load-more button { background: #e0e0e0; border: none; border-radius: 12px; padding: 6px 16px; font-size: 12px; cursor: pointer; color: #333; }
         .cw-load-more button:disabled { opacity: 0.5; cursor: default; }
     </style>
 
@@ -240,7 +204,7 @@
     `;
 
     // =========================
-    // 4. DOM 引用获取
+    // 4. DOM 引用
     // =========================
     const btn = shadow.querySelector(".cw-btn");
     const panel = shadow.querySelector(".cw-panel");
@@ -284,19 +248,45 @@
                (navigator.maxTouchPoints > 1 && window.innerWidth < 768);
     }
 
+    // ========== 时间格式化（同 chat.html） ==========
+    function formatMessageTime(ts) {
+        const d = new Date(ts);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const msgDate = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const diffDays = Math.floor((today - msgDate) / (24*3600*1000));
+        const hours = String(d.getHours()).padStart(2,'0');
+        const mins = String(d.getMinutes()).padStart(2,'0');
+        const timeStr = hours + ':' + mins;
+        if (diffDays === 0) return timeStr;
+        if (diffDays === 1) return '昨天 ' + timeStr;
+        if (diffDays <= 7) {
+            const weekdays = ['日','一','二','三','四','五','六'];
+            return '星期' + weekdays[d.getDay()] + ' ' + timeStr;
+        }
+        return (d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0') + ' ' + timeStr);
+    }
+
     // =========================
-    // 6. 消息渲染模块
+    // 6. 消息渲染（带时间）
     // =========================
     function addMessage(m, prepend = false) {
         const key = m.id;
-        if (!key) { console.warn('消息缺少id，无法去重', m); return; }
+        if (!key) { console.warn('消息缺少id', m); return; }
         if (hasSeen(key)) return;
         addSeen(key);
 
         const isUser = m.role === "user";
+        const wrapper = document.createElement("div");
+        wrapper.className = "cw-msg-wrapper";
+
+        const timeDiv = document.createElement("div");
+        timeDiv.className = "cw-msg-time";
+        timeDiv.textContent = formatMessageTime(m.time);
+        wrapper.appendChild(timeDiv);
+
         const row = document.createElement("div");
         row.className = "cw-msg-row " + (isUser ? "user" : "agent");
-
         const avatar = document.createElement("div");
         avatar.className = "cw-avatar " + (isUser ? "user" : "agent");
         avatar.innerText = isUser ? "你" : "客服";
@@ -310,7 +300,6 @@
             fileWrapper.className = "cw-file-msg";
             const fileCard = document.createElement("div");
             fileCard.className = "cw-file-card";
-
             const category = m.type || getFileCategory(m.mimeType);
             const fileUrl = m.fileUrl || m.url || "";
 
@@ -366,24 +355,24 @@
             bubble.innerText = m.text || "";
             row.appendChild(bubble);
         }
+        wrapper.appendChild(row);
 
         if (prepend) {
-            msgsContainer.insertBefore(row, msgsContainer.children[1]);
+            msgsContainer.insertBefore(wrapper, msgsContainer.children[1]);
         } else {
-            msgsContainer.appendChild(row);
-            row.scrollIntoView({ block: 'end', behavior: 'instant' });
+            msgsContainer.appendChild(wrapper);
+            wrapper.scrollIntoView({ block: 'end', behavior: 'instant' });
         }
     }
 
     // =========================
-    // 7. 历史加载模块
+    // 7. 历史加载
     // =========================
     async function loadHistory(params = {}) {
         if (!sid || !token) return;
         try {
             loadingMore = true;
             loadMoreBtn.disabled = true;
-
             const url = new URL(`${API}/history`);
             url.searchParams.set("sid", sid);
             url.searchParams.set("token", token);
@@ -394,7 +383,6 @@
             const r = await fetch(url.toString());
             const json = await r.json();
             const list = json.data || [];
-
             list.reverse();
 
             if (list.length > 0) {
@@ -405,12 +393,10 @@
                     oldestTime = list[0].time;
                     hasMoreHistory = json.hasMore !== false;
                 }
-
                 list.forEach(m => {
                     addMessage(m, !!params.before);
                     lastTime = Math.max(lastTime, m.time || 0);
                 });
-
                 if (!params.before && open) {
                     const last = msgsContainer.lastElementChild;
                     if (last) last.scrollIntoView({ block: 'end', behavior: 'instant' });
@@ -418,7 +404,6 @@
             } else {
                 hasMoreHistory = false;
             }
-
             loadMoreBtn.parentElement.style.display = hasMoreHistory ? "block" : "none";
         } catch (e) {
             console.error("load history failed:", e);
@@ -429,7 +414,7 @@
     }
 
     // =========================
-    // 8. 消息发送模块
+    // 8. 发送消息
     // =========================
     function clearFileSelection() {
         uploadingFile = null;
@@ -511,7 +496,6 @@
             attachBtn.disabled = false;
             uploadingOverlay.classList.remove("show");
             input.focus();
-
             lastMessageTime = Date.now();
             backoffInterval = BACKOFF_INIT;
             clearTimeout(pollTimer);
@@ -525,7 +509,7 @@
     });
 
     // =========================
-    // 9. 文件上传处理模块
+    // 9. 文件上传
     // =========================
     attachBtn.onclick = () => { if (!isUploading) fileInput.click(); };
     fileInput.addEventListener("change", e => {
@@ -577,11 +561,10 @@
     });
 
     // =========================
-    // 10. 轮询模块（退避策略）
+    // 10. 轮询
     // =========================
     const poll = async () => {
         if (!sid || !token) return;
-
         try {
             const url = new URL(`${API}/history`);
             url.searchParams.set("sid", sid);
@@ -592,7 +575,6 @@
             const json = await r.json();
             const list = json.data || [];
             list.reverse();
-
             let newMsgs = 0;
             list.forEach(m => {
                 if (m.role === "user") return;
@@ -600,7 +582,6 @@
                 lastTime = Math.max(lastTime, m.time || 0);
                 newMsgs++;
             });
-
             if (newMsgs > 0) {
                 lastMessageTime = Date.now();
                 backoffInterval = BACKOFF_INIT;
@@ -610,7 +591,6 @@
         const now = Date.now();
         const idle = now - lastMessageTime;
         let nextInterval;
-
         if (idle < FAST_DURATION) {
             nextInterval = POLL_FAST;
             backoffInterval = BACKOFF_INIT;
@@ -621,19 +601,11 @@
             nextInterval = backoffInterval;
             backoffInterval = Math.min(backoffInterval + BACKOFF_INCREMENT, BACKOFF_MAX);
         }
-
         pollTimer = setTimeout(poll, nextInterval);
     };
 
-    function startPolling() {
-        clearTimeout(pollTimer);
-        poll();
-    }
-
-    function stopPolling() {
-        clearTimeout(pollTimer);
-        pollTimer = null;
-    }
+    function startPolling() { clearTimeout(pollTimer); poll(); }
+    function stopPolling() { clearTimeout(pollTimer); pollTimer = null; }
 
     // =========================
     // 11. 会话初始化
@@ -652,7 +624,7 @@
     }
 
     // =========================
-    // 12. UI 交互逻辑
+    // 12. UI 交互
     // =========================
     let shrinkTimer = null;
     function clearShrinkTimer() {
@@ -668,13 +640,10 @@
     }
 
     btn.onclick = () => {
-        // 移动端：打开独立聊天页面
         if (isMobileDevice()) {
             window.open(`${API}/chat.html`, '_blank');
             return;
         }
-
-        // PC 端
         clearShrinkTimer();
         btn.classList.remove("cw-btn-shrunk", "keep-shrunk");
         open = !open;
@@ -684,10 +653,7 @@
             input.focus();
             const last = msgsContainer.lastElementChild;
             if (last) last.scrollIntoView({ block: 'end', behavior: 'instant' });
-            // 如果之前有会话且轮询未启动，则启动
-            if (sid && token && !pollTimer) {
-                startPolling();
-            }
+            if (sid && token && !pollTimer) startPolling();
         } else {
             stopPolling();
             scheduleShrink();
@@ -719,12 +685,11 @@
     });
 
     // =========================
-    // 13. 移动端键盘适配（弹窗已废弃，保留以防直接嵌入使用）
+    // 13. 移动端键盘适配（保留）
     // =========================
     if (/Mobi|Android/i.test(navigator.userAgent)) {
         const defaultBottomPadding = 40;
         panel.style.paddingBottom = defaultBottomPadding + "px";
-
         if (window.visualViewport) {
             window.visualViewport.addEventListener("resize", () => {
                 const heightDiff = window.innerHeight - window.visualViewport.height;
@@ -739,18 +704,14 @@
     }
 
     // =========================
-    // 14. 启动流程
+    // 14. 启动
     // =========================
     (async () => {
-        // 移动端无需加载弹窗资源，直接显示按钮
         if (isMobileDevice()) {
             scheduleShrink();
             return;
         }
-
-        // 无条件初始化会话（自动覆盖本地过期的 sid/token）
         await initSession();
-
         if (sid && token) {
             await loadHistory({ after: 0 });
             startPolling();
