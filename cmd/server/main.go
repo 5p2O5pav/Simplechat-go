@@ -33,6 +33,11 @@ func main() {
 	if err := services.CleanupExpiredSessions(); err != nil {
 		log.Printf("Initial cleanup error: %v", err)
 	}
+	
+	if err := utils.InitGeoIP("GeoLite2-City.mmdb"); err != nil {
+ 	   log.Println("GeoIP init failed:", err)
+	}
+	defer utils.CloseGeoIP()
 
 	r := mux.NewRouter()
 	// 静态文件
